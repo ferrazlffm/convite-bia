@@ -1,0 +1,6 @@
+{
+  "name": "Brasilidades da Bia",
+  "description": "Landing page e convite de 30 anos da Beatriz com temática Brasilidades: samba, feijoada, boteco e muita resenha!",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
