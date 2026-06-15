@@ -140,7 +140,7 @@ export default function ConvitePage() {
                 to="/album"
                 className="w-full bg-canary hover:bg-yellow-400 active:scale-95 text-stone-950 font-display text-base uppercase py-4 rounded-2xl border-3 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center gap-2 cursor-pointer transition-transform text-center"
               >
-                <span>Confirmar no Álbum de Figurinhas 🏆</span>
+                <span>Conhecer os convocados 🏆</span>
               </Link>
             </div>
           </div>

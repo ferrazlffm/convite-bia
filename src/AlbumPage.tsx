@@ -33,11 +33,21 @@ export default function AlbumPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [showConfetti, setShowConfetti] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isAdminMode, setIsAdminMode] = useState(false);
+  const [myStickerIds, setMyStickerIds] = useState<string[]>(() => {
+    try {
+      return JSON.parse(localStorage.getItem('my_stickers') || '[]');
+    } catch {
+      return [];
+    }
+  });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+  const clickCountRef = useRef(0);
+  const clickTimeoutRef = useRef<any>(null);
 
   // Load convidados from Supabase
   const fetchConvidados = async () => {
@@ -51,7 +61,7 @@ export default function AlbumPage() {
       const { data, error } = await supabase
         .from('convidados')
         .select('*')
-        .order('created_at', { ascending: true });
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
       setConvidados(data || []);
@@ -143,19 +153,26 @@ export default function AlbumPage() {
       const stickerUrl = publicUrlData.publicUrl;
 
       // 4. Save to Database
-      const { error: dbError } = await supabase
+      const { data: insertedData, error: dbError } = await supabase
         .from('convidados')
-        .insert([{ nome: nome.trim(), foto_url: stickerUrl }]);
+        .insert([{ nome: nome.trim(), foto_url: stickerUrl }])
+        .select();
 
       if (dbError) {
         console.error('Erro no banco:', dbError);
         throw new Error('Falha ao salvar no banco. Verifique se a tabela "convidados" e as políticas RLS foram criadas.');
       }
 
+      // Salva o ID da figurinha no localStorage
+      if (insertedData && insertedData[0]) {
+        const newId = insertedData[0].id;
+        const updatedIds = [...myStickerIds, newId];
+        setMyStickerIds(updatedIds);
+        localStorage.setItem('my_stickers', JSON.stringify(updatedIds));
+      }
+
       // 5. Success state & animations
       setSuccess(true);
-      setShowConfetti(true);
-      setTimeout(() => setShowConfetti(false), 5000);
 
       // Reset form
       setNome('');
@@ -167,6 +184,7 @@ export default function AlbumPage() {
 
       // Refresh guestlist
       fetchConvidados();
+      setCurrentPage(1);
 
       // Clear success banner after delay
       setTimeout(() => setSuccess(false), 4000);
@@ -177,26 +195,91 @@ export default function AlbumPage() {
     }
   };
 
+  const handleToggleAdminMode = () => {
+    if (isAdminMode) {
+      setIsAdminMode(false);
+      alert('Moderação desativada!');
+    } else {
+      const password = window.prompt('Digite a senha de administrador para moderar o álbum:');
+      const adminPassword = import.meta.env.VITE_ADMIN_PASSWORD || 'bia30';
+      if (password === adminPassword) {
+        setIsAdminMode(true);
+        alert('Moderação ativada!');
+      } else if (password !== null) {
+        alert('Senha incorreta!');
+      }
+    }
+  };
+
+  const handleTitleClick = () => {
+    clickCountRef.current += 1;
+    if (clickTimeoutRef.current) {
+      clearTimeout(clickTimeoutRef.current);
+    }
+    clickTimeoutRef.current = setTimeout(() => {
+      clickCountRef.current = 0;
+    }, 2000);
+
+    if (clickCountRef.current >= 5) {
+      clickCountRef.current = 0;
+      if (clickTimeoutRef.current) {
+        clearTimeout(clickTimeoutRef.current);
+      }
+      handleToggleAdminMode();
+    }
+  };
+
+  const handleDeleteSticker = async (id: string, fotoUrl: string) => {
+    const confirmDelete = window.confirm('Deseja realmente remover esta figurinha do álbum?');
+    if (!confirmDelete) return;
+
+    try {
+      setLoading(true);
+      if (!supabase) throw new Error('Supabase não configurado.');
+
+      // 1. Deleta do Banco de Dados
+      const { error: dbError } = await supabase
+        .from('convidados')
+        .delete()
+        .eq('id', id);
+
+      if (dbError) throw dbError;
+
+      // 2. Deleta do Storage se houver URL válida
+      if (fotoUrl) {
+        const fileName = fotoUrl.split('/').pop();
+        if (fileName) {
+          await supabase.storage
+            .from('fotos-figurinhas')
+            .remove([fileName]);
+        }
+      }
+
+      // 3. Atualiza estado local e localStorage
+      const updatedIds = myStickerIds.filter((myId) => myId !== id);
+      setMyStickerIds(updatedIds);
+      localStorage.setItem('my_stickers', JSON.stringify(updatedIds));
+
+      // 4. Recarrega os dados do álbum
+      await fetchConvidados();
+      alert('Figurinha removida com sucesso!');
+    } catch (err: any) {
+      console.error('Erro ao remover figurinha:', err);
+      alert(`Erro ao excluir figurinha: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const itemsPerPage = 4;
+  const totalPages = Math.ceil(convidados.length / itemsPerPage);
+  const paginatedConvidados = convidados.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
   return (
-    <div className="min-h-screen bg-[#005c24] text-white py-8 px-4 relative bg-grid-paper">
-      {/* Confetti Overlay for new sticker slap */}
-      {showConfetti && (
-        <div className="fixed inset-0 pointer-events-none z-50 flex flex-wrap justify-between overflow-hidden">
-          {[...Array(60)].map((_, i) => (
-            <div
-              key={i}
-              className="w-4 h-4 rounded-sm animate-bounce opacity-85"
-              style={{
-                backgroundColor: ['#F5D324', '#00933B', '#F17FB6', '#E11D48', '#0EA5E9'][i % 5],
-                transform: `rotate(${Math.random() * 360}deg)`,
-                animationDelay: `${Math.random() * 2}s`,
-                animationDuration: `${1 + Math.random() * 2}s`,
-                marginLeft: `${Math.random() * 100}vw`
-              }}
-            />
-          ))}
-        </div>
-      )}
+    <div className="min-h-screen bg-soccer-field text-white py-8 px-4 relative">
 
       <div className="max-w-4xl mx-auto">
         {/* Navigation & Header */}
@@ -325,7 +408,7 @@ export default function AlbumPage() {
                   ) : (
                     <>
                       <Upload className="w-5 h-5" />
-                      <span>Confirmar Presença no Álbum</span>
+                      <span>Colar sua figurinha</span>
                     </>
                   )}
                 </button>
@@ -360,7 +443,10 @@ export default function AlbumPage() {
         {/* Section 2: Grid Gallery */}
         <div className="border-t-8 border-black pt-12">
           <div className="text-center mb-8">
-            <h2 className="font-display text-3xl uppercase tracking-wider text-canary drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+            <h2
+              onClick={handleTitleClick}
+              className="font-display text-3xl uppercase tracking-wider text-canary drop-shadow-[2px_2px_0px_rgba(0,0,0,1)] cursor-pointer select-none"
+            >
               📖 CONVOCADOS DA MISTER
             </h2>
             <p className="text-xs font-mono uppercase text-rosepop mt-1">
@@ -382,26 +468,109 @@ export default function AlbumPage() {
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-6 md:gap-8 justify-items-center">
-              {convidados.map((c) => (
-                <div
-                  key={c.id}
-                  className="w-full max-w-[220px] bg-stone-900 border-4 border-black rounded-2xl shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] overflow-hidden transform hover:scale-105 hover:rotate-1 transition-all duration-300 animate-sticker-slap"
-                >
-                  <img
-                    src={c.foto_url}
-                    alt={`Figurinha de ${c.nome}`}
-                    className="w-full h-auto block"
-                    loading="lazy"
-                  />
-                  <div className="bg-stone-900 text-center py-2 border-t-2 border-black">
-                    <p className="font-display text-xs uppercase tracking-wider text-canary px-2 truncate">
-                      {c.nome}
-                    </p>
-                  </div>
+            <>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 justify-items-center">
+                {paginatedConvidados.map((c, index) => {
+                  const globalIndex = (currentPage - 1) * itemsPerPage + index + 1;
+                  // Rotações determinísticas para parecer que foram coladas manualmente
+                  const rotations = [
+                    '-rotate-2',
+                    '-rotate-1',
+                    'rotate-[1.5deg]',
+                    'rotate-2',
+                    '-rotate-[1.5deg]',
+                    'rotate-1',
+                    '-rotate-[2deg]',
+                    'rotate-[2deg]'
+                  ];
+                  const rotationClass = rotations[globalIndex % rotations.length];
+
+                  return (
+                    <div
+                      key={c.id}
+                      className="relative w-full max-w-[200px] aspect-[810/1013] group"
+                    >
+                      {/* 1. Slot/Moldura Vazia do Álbum (Fundo pontilhado) */}
+                      <div className="absolute inset-0 border-3 border-dashed border-white/20 rounded-2xl bg-black/45 flex flex-col items-center justify-center p-4 text-center select-none">
+                        <span className="font-mono text-[10px] uppercase text-white/35 tracking-widest">
+                          Figurinha
+                        </span>
+                        <span className="font-display text-4xl text-white/20 mt-1">
+                          Nº {globalIndex.toString().padStart(2, '0')}
+                        </span>
+                        <span className="font-mono text-[9px] text-white/20 mt-2 uppercase tracking-wide max-w-[95%] truncate">
+                          {c.nome}
+                        </span>
+                      </div>
+
+                      {/* 2. Figurinha Física Colada */}
+                      <div
+                        className={`w-full h-full p-1.5 bg-white border border-stone-200 rounded-2xl shadow-md shadow-black/40 transform ${rotationClass} group-hover:rotate-0 group-hover:scale-108 group-hover:shadow-2xl transition-all duration-300 ease-out z-10 relative animate-sticker-slap flex flex-col justify-center`}
+                      >
+                        {/* Botão de Remoção (Modo Admin ou se for a própria figurinha) */}
+                        {(myStickerIds.includes(c.id) || isAdminMode) && (
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteSticker(c.id, c.foto_url)}
+                            className="absolute top-2 right-2 z-30 bg-red-600 hover:bg-red-700 border-2 border-black text-white p-1 rounded-lg shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-y-[2px] active:shadow-none transition-all cursor-pointer flex items-center justify-center"
+                            title="Remover Figurinha"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="12"
+                              height="12"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="3"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <polyline points="3 6 5 6 21 6"></polyline>
+                              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                              <line x1="10" y1="11" x2="10" y2="17"></line>
+                              <line x1="14" y1="11" x2="14" y2="17"></line>
+                            </svg>
+                          </button>
+                        )}
+
+                        <img
+                          src={c.foto_url}
+                          alt={`Figurinha de ${c.nome}`}
+                          className="w-full h-auto block rounded-lg select-none"
+                          loading="lazy"
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Controles de Paginação */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-center gap-4 mt-12 pb-6">
+                  <button
+                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                    className="px-4 py-2 bg-stone-900 border-3 border-black text-white rounded-xl font-display text-xs uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[1px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[3px] active:shadow-none transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:transform-none"
+                  >
+                    ◀ Anterior
+                  </button>
+
+                  <span className="font-mono text-xs uppercase text-white font-bold bg-stone-900 border-3 border-black px-4 py-2 rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                    Página {currentPage} de {totalPages}
+                  </span>
+
+                  <button
+                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                    className="px-4 py-2 bg-stone-900 border-3 border-black text-white rounded-xl font-display text-xs uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[1px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[3px] active:shadow-none transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:transform-none"
+                  >
+                    Próxima ▶
+                  </button>
                 </div>
-              ))}
-            </div>
+              )}
+            </>
           )}
         </div>
       </div>

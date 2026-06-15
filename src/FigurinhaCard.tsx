@@ -45,15 +45,42 @@ export default function FigurinhaCard({ nome, fotoUrl, onRenderComplete }: Figur
         photo.onload = () => {
           if (!isSubscribed) return;
 
-          // Target Area: x=75, y=220, w=510, h=600 in 810x1013 canvas
-          const targetX = 75;
-          const targetY = 220;
-          const targetW = 510;
-          const targetH = 600;
+          // Target Area: x=50, y=120, w=560, h=720 in 810x1013 canvas
+          const targetX = 50;
+          const targetY = 120;
+          const targetW = 560;
+          const targetH = 720;
+
+          const borderWidth = 18; // Largura da borda branca de colagem
+          const borderRadius = 32; // Raio para cantos arredondados (estilo desenho animado)
+
+          ctx.save();
+
+          // 1. Cria caminho arredondado para o fundo branco
+          ctx.beginPath();
+          if (typeof ctx.roundRect === 'function') {
+            ctx.roundRect(targetX, targetY, targetW, targetH, borderRadius);
+          } else {
+            ctx.rect(targetX, targetY, targetW, targetH);
+          }
+
+          // Preenche a área de branco (borda da colagem)
+          ctx.fillStyle = '#FFFFFF';
+          ctx.fill();
+
+          // Clip para conter a foto dentro dos cantos arredondados se necessário
+          ctx.clip();
+
+          // 2. Calcula a área interna para a foto (encolhida pela borda)
+          const photoX = targetX + borderWidth;
+          const photoY = targetY + borderWidth;
+          const photoW = targetW - (2 * borderWidth);
+          const photoH = targetH - (2 * borderWidth);
+          const photoRadius = Math.max(0, borderRadius - borderWidth);
 
           // Draw cropped photo (object-fit: cover implementation)
           const imgRatio = photo.width / photo.height;
-          const targetRatio = targetW / targetH;
+          const targetRatio = photoW / photoH;
           let sx = 0, sy = 0, sw = photo.width, sh = photo.height;
 
           if (imgRatio > targetRatio) {
@@ -64,7 +91,43 @@ export default function FigurinhaCard({ nome, fotoUrl, onRenderComplete }: Figur
             sy = (photo.height - sh) / 2;
           }
 
-          ctx.drawImage(photo, sx, sy, sw, sh, targetX, targetY, targetW, targetH);
+          // Clip arredondado para a foto interna
+          ctx.save();
+          ctx.beginPath();
+          if (typeof ctx.roundRect === 'function') {
+            ctx.roundRect(photoX, photoY, photoW, photoH, photoRadius);
+          } else {
+            ctx.rect(photoX, photoY, photoW, photoH);
+          }
+          ctx.clip();
+
+          ctx.drawImage(photo, sx, sy, sw, sh, photoX, photoY, photoW, photoH);
+          ctx.restore(); // Restaura o clipe da foto interna
+
+          ctx.restore(); // Restaura o clipe do fundo branco geral
+
+          // 3. Desenha os contornos pretos para o efeito de desenho animado/adesivo
+          ctx.strokeStyle = '#000000';
+
+          // Borda externa grossa arredondada
+          ctx.lineWidth = 6;
+          ctx.beginPath();
+          if (typeof ctx.roundRect === 'function') {
+            ctx.roundRect(targetX, targetY, targetW, targetH, borderRadius);
+          } else {
+            ctx.rect(targetX, targetY, targetW, targetH);
+          }
+          ctx.stroke();
+
+          // Borda interna fina arredondada ao redor da foto
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          if (typeof ctx.roundRect === 'function') {
+            ctx.roundRect(photoX, photoY, photoW, photoH, photoRadius);
+          } else {
+            ctx.rect(photoX, photoY, photoW, photoH);
+          }
+          ctx.stroke();
 
           // 4. Draw Guest Name (over the photo and SVG background)
           drawName();
@@ -90,10 +153,10 @@ export default function FigurinhaCard({ nome, fotoUrl, onRenderComplete }: Figur
     };
 
     const drawName = () => {
-      // Name area coordinates: x=75, y=870, w=510, h=60
-      const x = 75;
-      const y = 870;
-      const w = 510;
+      // Name area coordinates
+      const x = 50;
+      const y = 925;
+      const w = 560;
       const h = 60;
 
       ctx.save();
@@ -102,8 +165,8 @@ export default function FigurinhaCard({ nome, fotoUrl, onRenderComplete }: Figur
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
 
-      // Let's set a responsive font size, starting at 38px
-      let fontSize = 38;
+      // Let's set a responsive font size, starting at 48px
+      let fontSize = 48;
       ctx.font = `bold ${fontSize}px "Lilita One", Arial, sans-serif`;
 
       const formattedName = (nome || 'SEU NOME').toUpperCase().trim();

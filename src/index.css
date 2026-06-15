@@ -149,3 +149,22 @@
   animation-delay: 0.5s;
 }
 
+/* 5. Soccer Field grass stripes and lines background pattern */
+.bg-soccer-field {
+  background-color: #005c24;
+  background-image: 
+    radial-gradient(circle at 50% 50%, transparent 120px, rgba(255, 255, 255, 0.12) 120px, rgba(255, 255, 255, 0.12) 124px, transparent 124px),
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.2) 8px, transparent 8px),
+    linear-gradient(to right, transparent calc(50% - 2px), rgba(255, 255, 255, 0.12) calc(50% - 2px), rgba(255, 255, 255, 0.12) calc(50% + 2px), transparent calc(50% + 2px)),
+    linear-gradient(to right, rgba(255, 255, 255, 0.08) 4px, transparent 4px),
+    linear-gradient(to left, rgba(255, 255, 255, 0.08) 4px, transparent 4px),
+    repeating-linear-gradient(
+      90deg,
+      #005c24,
+      #005c24 120px,
+      #004e1f 120px,
+      #004e1f 240px
+    );
+  background-attachment: fixed;
+}
+

@@ -15,28 +15,29 @@ import AlbumPage from './AlbumPage';
 
 export default function App() {
   const [audioPlaying, setAudioPlaying] = useState(false);
-  const [showConfetti, setShowConfetti] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
   const [isFading, setIsFading] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const location = useLocation();
 
   useEffect(() => {
-    // Initialize Audio Player
+    // Initialize Audio Player (runs only once on mount)
     audioRef.current = new Audio(pagodeSong);
     audioRef.current.loop = true;
-
-    // Check if directly accessing /album or hash contains /album
-    const isAlbumPath = location.pathname === '/album' || window.location.hash.includes('/album');
-    if (isAlbumPath) {
-      setShowSplash(false);
-    }
 
     return () => {
       if (audioRef.current) {
         audioRef.current.pause();
       }
     };
+  }, []);
+
+  useEffect(() => {
+    // Check if directly accessing /album or hash contains /album
+    const isAlbumPath = location.pathname === '/album' || window.location.hash.includes('/album');
+    if (isAlbumPath) {
+      setShowSplash(false);
+    }
   }, [location.pathname]);
 
   const handleAudioToggle = () => {
@@ -61,13 +62,11 @@ export default function App() {
     }
     setTimeout(() => {
       setShowSplash(false);
-      setShowConfetti(true);
-      setTimeout(() => setShowConfetti(false), 5000);
     }, 700);
   };
 
   return (
-    <div className="min-h-screen bg-[#FFFDF1] font-sans pb-24 overflow-x-hidden relative bg-grid-paper">
+    <div className="min-h-screen bg-[#FFFDF1] font-sans overflow-x-hidden relative bg-grid-paper">
       {/* Splash Screen */}
       {showSplash && (
         <div
@@ -110,24 +109,6 @@ export default function App() {
         </div>
       )}
 
-      {/* Dynamic Confetti Overlay */}
-      {showConfetti && (
-        <div className="fixed inset-0 pointer-events-none z-50 flex flex-wrap justify-between overflow-hidden">
-          {[...Array(60)].map((_, i) => (
-            <div
-              key={i}
-              className="w-4 h-4 rounded-sm animate-bounce opacity-85"
-              style={{
-                backgroundColor: ['#F5D324', '#00933B', '#F17FB6', '#E11D48', '#0EA5E9'][i % 5],
-                transform: `rotate(${Math.random() * 360}deg)`,
-                animationDelay: `${Math.random() * 2}s`,
-                animationDuration: `${1 + Math.random() * 2}s`,
-                marginLeft: `${Math.random() * 100}vw`
-              }}
-            />
-          ))}
-        </div>
-      )}
 
       {/* Sticky Play Bar (shared across routes) */}
       {!showSplash && (
