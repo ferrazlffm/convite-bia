@@ -5,11 +5,11 @@ import {
 } from 'lucide-react';
 
 // @ts-ignore
-import heroBia from './public/6.svg';
+import heroBia from './public/6.webp';
 // @ts-ignore
-import djCollage from './public/10.png';
+import djCollage from './public/10.webp';
 // @ts-ignore
-import filtroImage from './public/filtro.png';
+import filtroImage from './public/filtro.webp';
 
 export default function ConvitePage() {
   const [timeLeft, setTimeLeft] = useState({ dias: 0, horas: 0, minutos: 0, segundos: 0 });
@@ -51,11 +51,11 @@ export default function ConvitePage() {
           </h2>
 
           {/* HERO IMAGE */}
-          <div className="relative w-80 max-w-full mx-auto mb-8">
+          <div className="relative w-80 max-w-full mx-auto mb-8 aspect-[595/842] rounded-3xl border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] bg-rosepop overflow-hidden transform rotate-[-1deg] hover:rotate-0 hover:scale-105 transition-all duration-300">
             <img
               src={heroBia}
               alt="Bia - Já pode ou tá cedo?"
-              className="w-full h-auto rounded-3xl border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] bg-rosepop transform rotate-[-1deg] hover:rotate-0 hover:scale-105 transition-all duration-300"
+              className="w-full h-full object-cover"
             />
           </div>
 

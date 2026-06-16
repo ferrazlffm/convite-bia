@@ -7,7 +7,7 @@ import pagodeSong from './public/bagaço.mp3';
 // @ts-ignore
 import bgSplash from './public/37.svg';
 // @ts-ignore
-import centerImage from './public/3.svg';
+import centerImage from './public/3.webp';
 
 // Pages
 import ConvitePage from './ConvitePage';
