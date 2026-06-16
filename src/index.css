@@ -106,3 +106,65 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #f17fb6;
 }
+
+/* Custom transitions and animations for the sticker album */
+@keyframes sticker-slap {
+  0% {
+    opacity: 0;
+    transform: scale(2.2) rotate(-15deg);
+    filter: blur(4px);
+    box-shadow: 20px 20px 20px rgba(0, 0, 0, 0.4);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(0.92) rotate(4deg);
+    filter: none;
+    box-shadow: 4px 4px 0px 0px rgba(0,0,0,1);
+  }
+  75% {
+    transform: scale(1.06) rotate(-2deg);
+    box-shadow: 8px 8px 0px 0px rgba(0,0,0,1);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    box-shadow: 6px 6px 0px 0px rgba(0,0,0,1);
+  }
+}
+
+.animate-sticker-slap {
+  animation: sticker-slap 0.65s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+
+/* Add staggered delays for items in the album grid */
+.animate-sticker-slap:nth-child(2n) {
+  animation-delay: 0.1s;
+}
+.animate-sticker-slap:nth-child(3n) {
+  animation-delay: 0.2s;
+}
+.animate-sticker-slap:nth-child(4n) {
+  animation-delay: 0.35s;
+}
+.animate-sticker-slap:nth-child(5n) {
+  animation-delay: 0.5s;
+}
+
+/* 5. Soccer Field grass stripes and lines background pattern */
+.bg-soccer-field {
+  background-color: #005c24;
+  background-image: 
+    radial-gradient(circle at 50% 50%, transparent 120px, rgba(255, 255, 255, 0.12) 120px, rgba(255, 255, 255, 0.12) 124px, transparent 124px),
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.2) 8px, transparent 8px),
+    linear-gradient(to right, transparent calc(50% - 2px), rgba(255, 255, 255, 0.12) calc(50% - 2px), rgba(255, 255, 255, 0.12) calc(50% + 2px), transparent calc(50% + 2px)),
+    linear-gradient(to right, rgba(255, 255, 255, 0.08) 4px, transparent 4px),
+    linear-gradient(to left, rgba(255, 255, 255, 0.08) 4px, transparent 4px),
+    repeating-linear-gradient(
+      90deg,
+      #005c24,
+      #005c24 120px,
+      #004e1f 120px,
+      #004e1f 240px
+    );
+  background-attachment: fixed;
+}
+
