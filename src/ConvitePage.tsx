@@ -138,7 +138,7 @@ export default function ConvitePage() {
 
               <Link
                 to="/album"
-                className="w-full bg-canary hover:bg-yellow-400 active:scale-95 text-stone-950 font-display text-base uppercase py-4 rounded-2xl border-3 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center gap-2 cursor-pointer transition-transform text-center"
+                className="w-full bg-orange-500 hover:bg-orange-600 active:scale-95 text-stone-950 font-display text-base uppercase py-4 rounded-2xl border-3 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center gap-2 cursor-pointer transition-transform text-center"
               >
                 <span>Conhecer os convocados 🏆</span>
               </Link>
@@ -324,9 +324,9 @@ export default function ConvitePage() {
                 href="https://www.google.com/maps/search/?api=1&query=Av.+S%C3%A3o+Pedro,+186,+Pedro+Leme+-+Roseira+-+SP"
                 target="_blank"
                 rel="noreferrer"
-                className="bg-stone-950 hover:bg-stone-850 active:scale-95 text-white font-display text-xs p-4 rounded-2xl border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] uppercase text-center cursor-pointer flex items-center justify-center gap-2"
+                className="bg-rosepop hover:bg-pink-400 active:scale-95 text-stone-950 font-display text-xs p-4 rounded-2xl border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] uppercase text-center cursor-pointer flex items-center justify-center gap-2"
               >
-                <Compass className="w-4 h-4 text-greenflag animate-spin" style={{ animationDuration: '3s' }} />
+                <Compass className="w-4 h-4 text-stone-950 animate-spin" style={{ animationDuration: '3s' }} />
                 <span>Google Maps</span>
               </a>
 
@@ -334,10 +334,10 @@ export default function ConvitePage() {
                 href="https://waze.com/ul?q=Av.+S%C3%A3o+Pedro,+186,+Pedro+Leme+-+Roseira+-+SP"
                 target="_blank"
                 rel="noreferrer"
-                className="bg-yellow-500 hover:bg-yellow-400 active:scale-95 text-stone-950 font-display text-xs p-4 rounded-2xl border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] uppercase text-center cursor-pointer flex items-center justify-center gap-2"
+                className="bg-orange-500 hover:bg-orange-600 active:scale-95 text-stone-950 font-display text-xs p-4 rounded-2xl border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] uppercase text-center cursor-pointer flex items-center justify-center gap-2"
               >
                 <MapPin className="w-4 h-4 text-stone-950 animate-bounce" />
-                <span>Rotas pelo Waze</span>
+                <span>Waze</span>
               </a>
             </div>
           </div>

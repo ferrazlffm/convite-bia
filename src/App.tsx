@@ -70,9 +70,8 @@ export default function App() {
       {/* Splash Screen */}
       {showSplash && (
         <div
-          className={`fixed inset-0 z-50 flex items-center justify-center bg-[#FFFDF1] p-4 border-8 border-black transition-all duration-700 ease-in-out bg-cover bg-center bg-no-repeat ${
-            isFading ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'
-          }`}
+          className={`fixed inset-0 z-50 flex items-center justify-center bg-[#FFFDF1] p-4 border-8 border-black transition-all duration-700 ease-in-out bg-cover bg-center bg-no-repeat ${isFading ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'
+            }`}
           style={{ backgroundImage: `url(${bgSplash})` }}
         >
           <div
@@ -122,7 +121,7 @@ export default function App() {
                 <img src={centerImage} alt="Bia Top Bar" className="w-full h-full object-cover" />
               </div>
               <div>
-                <h1 className="font-display text-lg tracking-wider text-canary">Bia 30 Anos</h1>
+                <h1 className="font-display text-lg tracking-wider text-rosepop">Bia 30 Anos</h1>
                 <p className="text-[10px] text-stone-400 font-mono tracking-tight uppercase">Trilha Sonora ao Vivo</p>
               </div>
             </div>
@@ -130,14 +129,13 @@ export default function App() {
             <div className="flex items-center gap-3">
               <button
                 onClick={handleAudioToggle}
-                className={`px-4 py-1.5 rounded-full font-display border-2 border-white flex items-center gap-2 text-xs uppercase cursor-pointer transition-all active:scale-95 ${
-                  audioPlaying ? 'bg-greenflag text-white border-green-400' : 'bg-rosepop text-stone-950 border-stone-850 hover:bg-rose-400'
-                }`}
+                className={`px-4 py-1.5 rounded-full font-display border-2 border-white flex items-center gap-2 text-xs uppercase cursor-pointer transition-all active:scale-95 ${audioPlaying ? 'bg-orange-500 text-stone-950 border-orange-400 hover:bg-orange-600' : 'bg-rosepop text-stone-950 border-stone-850 hover:bg-rose-400'
+                  }`}
               >
                 {audioPlaying ? (
                   <>
                     <Volume2 className="w-4 h-4 animate-pulse" />
-                    <span>Mudo</span>
+                    <span>Parar música</span>
                   </>
                 ) : (
                   <>
