@@ -102,7 +102,7 @@ export default function App() {
               className="w-full bg-greenflag hover:bg-green-700 active:scale-95 text-white font-display text-base uppercase py-4 rounded-2xl border-3 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] cursor-pointer flex items-center justify-center gap-3 animate-pulse"
             >
               <Volume2 className="w-5 h-5 animate-bounce" />
-              <span>Entrar no Bar 🍻</span>
+              <span>Abrir o convite 📩</span>
             </button>
           </div>
         </div>
